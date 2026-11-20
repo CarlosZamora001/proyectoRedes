@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Simulaciones de Redes | OpenStack Identity · UPTC</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            apple: {
+              blue: "#0A84FF",
+              green: "#30D158",
+              indigo: "#5E5CE6",
+              orange: "#FF9F0A",
+              pink: "#FF375F",
+              purple: "#BF5AF2",
+              red: "#FF453A",
+              teal: "#64D2FF",
+              yellow: "#FFD60A"
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Hoja de estilos compartida del ecosistema de simulaciones -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <style>
+    /* Efecto de gradiente sutil y transiciones fluidas */
+    .fade-enter {
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    }
+    .fade-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .role-card-selected {
+      border-color: #0A84FF !important;
+      background: rgba(10, 132, 255, 0.12) !important;
+      box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col selection:bg-[#0A84FF] selection:text-white">
+
+  <!-- ================= BARRA DE NAVEGACIÓN SUPERIOR ================= -->
+  <header class="apple-glass-nav sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex items-center justify-between gap-3">
+        
+        <!-- Identidad Institucional -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-[12px] bg-gradient-to-b from-[#0A84FF] to-[#0062CC] flex items-center justify-center text-white font-bold shadow-[0_4px_14px_rgba(10,132,255,0.4)] shrink-0 border border-white/20">
+            <svg class="w-5 h-5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="apple-badge apple-badge-blue text-[10px] uppercase font-mono tracking-wider">UPTC · Nube Privada 2026</span>
+              <span class="text-white/20 hidden sm:inline">|</span>
+              <span class="text-[11px] text-white/60 font-medium hidden sm:inline">Ingeniería de Sistemas</span>
+            </div>
+            <h1 class="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5">
+              Portal de Laboratorio & Simulaciones de Redes
+            </h1>
+          </div>
+        </div>
+
+        <!-- Zona de Usuario / Logout (Visible tras login) -->
+        <div id="headerUserZone" class="hidden flex items-center gap-2.5">
+          <div class="hidden md:flex flex-col text-right">
+            <span id="headerUserName" class="text-xs font-semibold text-white">Usuario</span>
+            <span id="headerUserEmail" class="text-[10px] text-white/50 font-mono">correo@uptc.edu.co</span>
+          </div>
+
+          <!-- Badge de Perfil y OpenStack -->
+          <div id="headerRoleBadge" class="apple-badge apple-badge-blue text-[11px] font-mono font-medium">
+            Profesor · Nivel 1
+          </div>
+
+          <div class="h-5 w-px bg-white/10 hidden sm:block"></div>
+
+          <!-- Botón Cerrar Sesión (Logout) -->
+          <button id="btnLogout" class="apple-btn-destructive text-xs py-1.5 px-3 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= CONTENEDOR PRINCIPAL ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col justify-center">
+
+    <!-- ================= 1. VISTA DE AUTENTICACIÓN (LOGIN & REGISTRO) ================= -->
+    <section id="authSection" class="w-full max-w-md mx-auto my-auto space-y-6">
+      
+      <!-- Logo Central & Título -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex p-3 rounded-2xl bg-gradient-to-b from-[#0A84FF]/20 to-[#5E5CE6]/10 border border-white/10 shadow-2xl mb-1">
+          <svg class="w-8 h-8 text-[#64D2FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold tracking-tight text-white">Autenticación OpenStack</h2>
+        <p class="text-xs text-white/60">
+          Servicio de Identidad Keystone v3 con jerarquía de roles (Profesor / Alumno).
+        </p>
+      </div>
+
+      <!-- Selector Tipo Cápsula Apple: Iniciar Sesión vs Registrarse -->
+      <div class="apple-nav-capsule flex p-1">
+        <button id="tabBtnLogin" class="nav-tab-btn tab-active flex-1 py-1.5 text-xs font-semibold text-center transition">
+          Iniciar Sesión
+        </button>
+        <button id="tabBtnRegister" class="nav-tab-btn tab-inactive flex-1 py-1.5 text-xs font-medium text-center transition">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- Mensaje de Alerta / Notificación -->
+      <div id="authAlert" class="hidden p-3 rounded-xl text-xs font-medium border transition-all"></div>
+
+      <!-- FORMULARIO 1: LOGIN -->
+      <form id="formLogin" class="apple-glass-card p-6 sm:p-7 space-y-4 border border-white/10">
+        <div>
+          <label class="block text-xs font-medium text-white/70 mb-1.5">Correo Electrónico</label>
+          <input type="email" id="loginEmail" placeholder="usuario@uptc.edu.co" required
+                 class="apple-input w-full text-xs">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-medium text-white/70">Contraseña</label>
+            <button type="button" id="toggleLoginPassword" class="text-[11px] text-[#64D2FF] hover:underline">
+              Mostrar
+            </button>
+          </div>
+          <input type="password" id="loginPassword" placeholder="••••••••" required
+                 class="apple-input w-full text-xs">
+        </div>
+
+        <button type="submit" class="apple-btn-primary w-full text-xs py-2.5 font-semibold flex items-center justify-center gap-2 mt-2">
+          <span>Ingresar a la Plataforma</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </button>
+
+        <!-- Acceso Rápido con Cuentas Demo -->
+        <div class="pt-3 border-t border-white/[0.08] space-y-2">
+          <span class="block text-[10px] text-white/40 uppercase tracking-wider font-mono text-center">
+            Cuentas Demo Preconfiguradas:
+          </span>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btnFillProfesor" class="apple-btn-secondary text-[11px] py-1.5 px-2 flex items-center justify-center gap-1.5">
+              <span>👨‍🏫</span>
+              <span>Profesor Demo</span>
+            </button>
+            <button type="button" id="btnFillAlumno" class="apple-btn-secondary text-[11px] py-1.5 px-2 flex items-center justify-center gap-1.5">
+              <span>🎓</span>
+              <span>Alumno Demo</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- FORMULARIO 2: REGISTRO (CON SELECCIÓN DE JERARQUÍA PROFESOR / ALUMNO) -->
+      <form id="formRegister" class="apple-glass-card p-6 sm:p-7 space-y-4 border border-white/10 hidden">
+        <div>
+          <label class="block text-xs font-medium text-white/70 mb-1.5">Nombre Completo</label>
+          <input type="text" id="regName" placeholder="Ej. Carlos Albeiro Zamora" required
+                 class="apple-input w-full text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-white/70 mb-1.5">Correo Electrónico</label>
+          <input type="email" id="regEmail" placeholder="usuario@uptc.edu.co" required
+                 class="apple-input w-full text-xs">
+        </div>
+
+        <!-- Selector de Perfil Jerárquico para OpenStack -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-white/70">
+            Tipo de Perfil (Jerarquía OpenStack Keystone)
+          </label>
+          <div class="grid grid-cols-2 gap-2.5">
+            
+            <!-- Opción: Profesor -->
+            <label id="cardRoleProfesor" class="apple-card p-3 cursor-pointer border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between">
+              <input type="radio" name="userRole" value="profesor" class="hidden">
+              <div class="flex items-center justify-between">
+                <span class="text-base">👨‍🏫</span>
+                <span class="apple-badge apple-badge-blue text-[9px] font-mono">Nivel 1</span>
+              </div>
+              <div class="mt-2">
+                <span class="block text-xs font-bold text-white">Profesor</span>
+                <span class="block text-[10px] text-white/50 leading-tight mt-0.5">Rol OpenStack: admin</span>
+              </div>
+            </label>
+
+            <!-- Opción: Alumno -->
+            <label id="cardRoleAlumno" class="apple-card p-3 cursor-pointer border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between role-card-selected">
+              <input type="radio" name="userRole" value="alumno" checked class="hidden">
+              <div class="flex items-center justify-between">
+                <span class="text-base">🎓</span>
+                <span class="apple-badge apple-badge-green text-[9px] font-mono">Nivel 2</span>
+              </div>
+              <div class="mt-2">
+                <span class="block text-xs font-bold text-white">Alumno</span>
+                <span class="block text-[10px] text-white/50 leading-tight mt-0.5">Rol OpenStack: member</span>
+              </div>
+            </label>
+
+          </div>
+          <p id="roleDescriptionText" class="text-[10px] text-white/50 font-mono mt-1">
+            * Alumno: Privilegios de ejecución de prácticas y análisis en el proyecto de laboratorio.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-white/70 mb-1.5">Contraseña</label>
+          <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required minlength="6"
+                 class="apple-input w-full text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-white/70 mb-1.5">Confirmar Contraseña</label>
+          <input type="password" id="regConfirmPassword" placeholder="Repita la contraseña" required minlength="6"
+                 class="apple-input w-full text-xs">
+        </div>
+
+        <button type="submit" class="apple-btn-primary w-full text-xs py-2.5 font-semibold flex items-center justify-center gap-2 mt-2">
+          <span>Crear Cuenta y Conectar</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </button>
+      </form>
+
+    </section>
+
+
+    <!-- ================= 2. VENTANA PRINCIPAL (POST-LOGIN) ================= -->
+    <section id="mainSection" class="w-full space-y-8 hidden">
+      
+      <!-- Tarjeta de Bienvenida y Estado OpenStack -->
+      <div class="apple-card p-6 sm:p-8 bg-gradient-to-b from-[#18181D] to-[#0F0F13] border border-white/10 shadow-2xl relative overflow-hidden">
+        
+        <!-- Glow ambiental -->
+        <div class="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="space-y-2 max-w-2xl">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="welcomeRoleBadge" class="apple-badge apple-badge-blue text-xs font-mono">
+                Rol: Profesor
+              </span>
+              <span class="apple-badge apple-badge-gray text-xs font-mono">
+                Proyecto: Laboratorio-Redes-UPTC
+              </span>
+              <span class="apple-badge apple-badge-green text-xs font-mono">
+                Token Keystone Activo
+              </span>
+            </div>
+
+            <h2 id="welcomeTitle" class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Bienvenido, Docente
+            </h2>
+
+            <p id="welcomeDescription" class="text-xs sm:text-sm text-white/70 leading-relaxed font-normal">
+              La sesión está autenticada y reconocida por la jerarquía de OpenStack Identity. Desde este panel puede acceder a cualquiera de las dos simulaciones de redes de datos disponibles.
+            </p>
+          </div>
+
+          <!-- Acciones de Keystone -->
+          <div class="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0">
+            <button id="btnViewKeystoneToken" class="apple-btn-secondary text-xs py-2 px-3.5 flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#64D2FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+              <span>Inspeccionar Token Keystone</span>
+            </button>
+
+            <button id="btnDownloadOpenRC" class="apple-btn-secondary text-xs py-2 px-3.5 flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#30D158]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <span>Descargar openrc.sh</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SECCIÓN DE LAS 2 SIMULACIONES (LOS 2 BOTONES) ================= -->
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            <span>Simuladores de Redes Disponibles</span>
+            <span class="apple-badge apple-badge-gray text-[10px] font-mono">2 Entornos</span>
+          </h3>
+          <p class="text-xs text-white/60 mt-0.5">
+            Seleccione una de las simulaciones para ingresar al entorno interactivo de experimentación.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- BOTÓN / TARJETA 1: SIMULACIÓN 1 (PACKET FLOW SIMULATOR) -->
+          <div class="apple-card-interactive p-6 sm:p-7 flex flex-col justify-between border border-white/10 hover:border-[#0A84FF]/40 relative group overflow-hidden">
+            <div class="space-y-4">
+              
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#0A84FF] to-[#0055B3] flex items-center justify-center text-white shadow-lg shadow-blue-500/20 border border-white/20">
+                  <svg class="w-6 h-6 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                </div>
+                <span class="apple-badge apple-badge-blue text-[10px] font-mono uppercase tracking-wider">
+                  Simulación 1
+                </span>
+              </div>
+
+              <div>
+                <h4 class="text-lg font-bold text-white group-hover:text-[#64D2FF] transition">
+                  Simulador de Flujo de Paquetes en Red
+                </h4>
+                <p class="text-xs text-white/50 font-mono mt-0.5">
+                  Network Packet Flow Simulator · Tránsito L2 a L7
+                </p>
+                <p class="text-xs text-white/70 leading-relaxed mt-3">
+                  Visualice la trayectoria de paquetes IP atravesando <strong>Switches L2, Routers con NAT L3 y Firewalls SPI</strong>. Permite la inspección detallada de tramas Ethernet, cabeceras IPv4, puertos TCP/UDP y carga útil en cada salto.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="apple-badge apple-badge-gray text-[10px]">Capa 2 Switch</span>
+                <span class="apple-badge apple-badge-gray text-[10px]">Capa 3 NAT</span>
+                <span class="apple-badge apple-badge-gray text-[10px]">Firewall SPI</span>
+                <span class="apple-badge apple-badge-gray text-[10px]">Desencapsulación</span>
+              </div>
+            </div>
+
+            <!-- Botón de Redirección -->
+            <div class="mt-6 pt-4 border-t border-white/[0.08]">
+              <a href="network-packet-flow-simulator-main/index.html" class="apple-btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-2 group-hover:shadow-[0_4px_16px_rgba(10,132,255,0.4)]">
+                <span>Ingresar al Simulador de Flujo de Paquetes</span>
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- BOTÓN / TARJETA 2: SIMULACIÓN 2 (PROTOCOL EXPLORER) -->
+          <div class="apple-card-interactive p-6 sm:p-7 flex flex-col justify-between border border-white/10 hover:border-[#BF5AF2]/40 relative group overflow-hidden">
+            <div class="space-y-4">
+              
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#BF5AF2] to-[#5538CE] flex items-center justify-center text-white shadow-lg shadow-purple-500/20 border border-white/20">
+                  <svg class="w-6 h-6 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                    <polyline points="2 17 12 22 22 17"/>
+                    <polyline points="2 12 12 17 22 12"/>
+                  </svg>
+                </div>
+                <span class="apple-badge apple-badge-purple text-[10px] font-mono uppercase tracking-wider">
+                  Simulación 2
+                </span>
+              </div>
+
+              <div>
+                <h4 class="text-lg font-bold text-white group-hover:text-[#BF5AF2] transition">
+                  Protocol Explorer · Learn how the internet works
+                </h4>
+                <p class="text-xs text-white/50 font-mono mt-0.5">
+                  https://protocol-explorer-alpha.vercel.app/
+                </p>
+                <p class="text-xs text-white/70 leading-relaxed mt-3">
+                  Aprenda y explore cómo funciona Internet a bajo nivel: resolución de nombres <strong>DNS</strong>, negociación de cifrado <strong>TLS</strong>, peticiones y respuestas <strong>HTTP/HTTPS</strong>, paquetes <strong>TCP/IP</strong> y flujo de datos interactivo.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="apple-badge apple-badge-gray text-[10px]">DNS Resolution</span>
+                <span class="apple-badge apple-badge-gray text-[10px]">TLS Handshake</span>
+                <span class="apple-badge apple-badge-gray text-[10px]">HTTP Request/Response</span>
+                <span class="apple-badge apple-badge-gray text-[10px]">TCP/IP Packets</span>
+              </div>
+            </div>
+
+            <!-- Botones de Redirección -->
+            <div class="mt-6 pt-4 border-t border-white/[0.08] flex flex-col sm:flex-row gap-2">
+              <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer" class="apple-btn-primary flex-1 text-xs py-2.5 flex items-center justify-center gap-2 group-hover:shadow-[0_4px_16px_rgba(191,90,242,0.4)]" style="background: linear-gradient(180deg, #BF5AF2 0%, #6830D9 100%);">
+                <span>Protocol Explorer · Learn how the internet works</span>
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+              <a href="protocol-explorer-app/index.html" class="apple-btn-secondary text-xs py-2.5 px-3.5 flex items-center justify-center gap-1.5 border-white/10 text-white/80">
+                <span>Vista Local</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Módulo Complementario: Dispositivos de Interconexión UPTC (Hub, Repetidor, Gateway) -->
+        <div class="apple-card p-4 bg-[#0a0a0d] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-[#30D158]/20 text-[#30D158] flex items-center justify-center font-bold text-sm border border-[#30D158]/30">
+              ⚡
+            </div>
+            <div>
+              <h5 class="text-xs font-bold text-white flex items-center gap-2">
+                <span>Simulador de Interconexión UPTC (Hubs, Repetidores & Gateways)</span>
+                <span class="apple-badge apple-badge-green text-[9px] font-mono">Disponible</span>
+              </h5>
+              <p class="text-[11px] text-white/50">
+                Colisiones CSMA/CD, osciloscopio 3R en Par Trenzado y pasarela de traducción semántica VoIP.
+              </p>
+            </div>
+          </div>
+          <a href="simulacion-redes/index.html" class="apple-btn-secondary text-xs py-1.5 px-3.5 shrink-0 flex items-center gap-1.5 border-[#30D158]/30 text-[#30D158]">
+            <span>Abrir Simulador UPTC</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ================= PANEL DE JERARQUÍA OPENSTACK KEYSTONE ================= -->
+      <div class="apple-card p-6 bg-[#0a0a0d] border border-white/10 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+          <div>
+            <h4 class="text-sm font-bold text-white flex items-center gap-2 font-mono">
+              <span class="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+              Jerarquía de Roles & Políticas RBAC (OpenStack Identity)
+            </h4>
+            <p class="text-[11px] text-white/50 mt-0.5">
+              Esquema de asignación jerárquica para validación de políticas y control de acceso.
+            </p>
+          </div>
+          <span class="apple-badge apple-badge-gray text-[10px] font-mono">
+            API Version: Keystone v3.14+
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+          <!-- Columna 1: Nivel 1 (Profesor) -->
+          <div class="p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-blue-400 font-bold">Nivel 1: Profesor (Docente)</span>
+              <span class="apple-badge apple-badge-blue text-[9px]">OpenStack: admin</span>
+            </div>
+            <p class="text-[11px] text-white/70 font-sans">
+              Control total sobre topologías, inyección de tráfico, generación de fallas de enlace y auditoría de métricas de estudiantes.
+            </p>
+            <ul class="text-[10px] text-white/50 space-y-1 list-disc list-inside">
+              <li>Infiere roles: instructor, member, reader</li>
+              <li>Scope: project:Laboratorio-Redes-UPTC</li>
+              <li>Permiso: simulation:all_access</li>
+            </ul>
+          </div>
+
+          <!-- Columna 2: Nivel 2 (Alumno) -->
+          <div class="p-4 rounded-xl border border-green-500/30 bg-green-500/5 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-green-400 font-bold">Nivel 2: Alumno (Estudiante)</span>
+              <span class="apple-badge apple-badge-green text-[9px]">OpenStack: member</span>
+            </div>
+            <p class="text-[11px] text-white/70 font-sans">
+              Ejecución de escenarios guiados, emisión de paquetes de prueba, observación del osciloscopio y exportación de reportes de práctica.
+            </p>
+            <ul class="text-[10px] text-white/50 space-y-1 list-disc list-inside">
+              <li>Infiere roles: student, reader</li>
+              <li>Scope: project:Laboratorio-Redes-UPTC</li>
+              <li>Permiso: simulation:run_practice</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= PIE DE PÁGINA ================= -->
+  <footer class="border-t border-white/[0.08] py-5 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
+      <div class="flex items-center gap-2">
+        <span>Universidad Pedagógica y Tecnológica de Colombia (UPTC)</span>
+        <span>·</span>
+        <span>Redes de Datos & Nube Privada</span>
+      </div>
+      <div class="font-mono text-[11px]">
+        Tunja, 2026 · Compatible con OpenStack Keystone v3
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL INSPECTOR TOKEN KEYSTONE ================= -->
+  <div id="modalKeystone" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="apple-glass-modal max-w-2xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="apple-badge apple-badge-blue text-xs font-mono">Keystone v3 Token</span>
+          <h3 class="text-sm font-bold text-white">Inspección de Identidad y Roles</h3>
+        </div>
+        <button id="btnCloseModal" class="text-white/60 hover:text-white text-lg font-mono">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <pre id="jsonTokenViewer" class="p-4 rounded-xl bg-black/60 border border-white/10 text-[11px] font-mono text-[#64D2FF] overflow-x-auto"></pre>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
+        <span class="text-white/40 text-[11px]">Token X-Subject-Token RFC Compliant</span>
+        <button id="btnCopyTokenJson" class="apple-btn-secondary text-xs py-1.5 px-3">
+          Copiar JSON
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carga del Motor de Autenticación OpenStack y UI -->
+  <script src="js/openstack-auth.js"></script>
+  <script src="js/portal-ui.js"></script>
+</body>
+</html>
+

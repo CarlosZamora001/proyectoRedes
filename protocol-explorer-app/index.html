@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protocol Explorer App | Explorador de Protocolos & Transacciones · UPTC 2026</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            apple: {
+              blue: "#0A84FF",
+              green: "#30D158",
+              indigo: "#5E5CE6",
+              orange: "#FF9F0A",
+              pink: "#FF375F",
+              purple: "#BF5AF2",
+              red: "#FF453A",
+              teal: "#64D2FF",
+              yellow: "#FFD60A"
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Hoja de estilos Apple HIG compartida -->
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col selection:bg-[#BF5AF2] selection:text-white">
+
+  <!-- ================= HEADER LIQUID GLASS ================= -->
+  <header class="apple-glass-nav sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        
+        <div class="flex items-center gap-3.5">
+          <!-- Botón Volver al Portal -->
+          <a href="../index.html" class="apple-btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Volver al Portal</span>
+          </a>
+
+          <!-- Icono Protocol Explorer -->
+          <div class="w-10 h-10 rounded-[12px] bg-gradient-to-b from-[#BF5AF2] to-[#5538CE] flex items-center justify-center text-white font-bold shadow-[0_4px_14px_rgba(191,90,242,0.4)] shrink-0 border border-white/20">
+            <svg class="w-5 h-5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="apple-badge apple-badge-purple text-[10px] uppercase font-mono tracking-wider">
+                Simulación 2 · Protocol Explorer App
+              </span>
+              <span class="text-white/20">|</span>
+              <span id="userBadgeHeader" class="apple-badge apple-badge-gray text-[10px] font-mono">
+                Sesión OpenStack
+              </span>
+            </div>
+            <h1 class="text-base sm:text-lg font-bold text-white tracking-tight mt-0.5">
+              Protocol Explorer · Learn how the internet works
+            </h1>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer" class="apple-btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5" style="background: linear-gradient(180deg, #BF5AF2 0%, #7839EE 100%);">
+            <span>Abrir Vercel Live App</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= CONTENIDO PRINCIPAL ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- Tarjeta de Resumen -->
+    <div class="apple-card p-6 bg-gradient-to-r from-[#171424] via-[#12111E] to-[#0A0A0E] border border-[#BF5AF2]/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#BF5AF2] animate-pulse"></span>
+          <h2 class="text-lg font-bold text-white">
+            <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer" class="hover:text-[#BF5AF2] transition underline decoration-[#BF5AF2]/50">
+              Protocol Explorer · Learn how the internet works
+            </a>
+          </h2>
+          <span class="apple-badge apple-badge-purple text-xs font-mono">Live Vercel</span>
+        </div>
+        <p class="text-xs text-white/70 max-w-3xl leading-relaxed">
+          Herramienta interactiva para aprender y experimentar con la arquitectura de protocolos de Internet: resoluciones DNS, negociación de túneles TLS/SSL, transferencias HTTP/HTTPS, paquetes TCP/IP y auditoría de transacciones criptográficas en la red.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 shrink-0">
+        <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer" class="apple-btn-primary text-xs px-4 py-2 flex items-center gap-1.5" style="background: linear-gradient(180deg, #BF5AF2 0%, #7839EE 100%);">
+          <span>Abrir en Vercel</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+        <button id="btnNewTxn" class="apple-btn-secondary text-xs px-3.5 py-2 flex items-center gap-1.5">
+          <span>Simular Transacción</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Métricas del Protocolo (TxnTypeCountCards) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="apple-card p-4 bg-white/[0.03] border border-white/10 hover:border-[#BF5AF2]/30 transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-white/60 font-medium">IP Organizations</span>
+          <span class="text-base">🏢</span>
+        </div>
+        <div id="statIpOrgs" class="text-2xl font-bold font-mono text-[#BF5AF2] mt-1">42</div>
+        <span class="text-[10px] text-white/40 font-mono">Organizaciones registradas</span>
+      </div>
+
+      <div class="apple-card p-4 bg-white/[0.03] border border-white/10 hover:border-[#0A84FF]/30 transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-white/60 font-medium">IP Assets</span>
+          <span class="text-base">💎</span>
+        </div>
+        <div id="statIpAssets" class="text-2xl font-bold font-mono text-[#64D2FF] mt-1">1,280</div>
+        <span class="text-[10px] text-white/40 font-mono">Activos indexados</span>
+      </div>
+
+      <div class="apple-card p-4 bg-white/[0.03] border border-white/10 hover:border-[#30D158]/30 transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-white/60 font-medium">Relationships</span>
+          <span class="text-base">🔗</span>
+        </div>
+        <div id="statRelationships" class="text-2xl font-bold font-mono text-[#30D158] mt-1">3,492</div>
+        <span class="text-[10px] text-white/40 font-mono">Relaciones validadas</span>
+      </div>
+
+      <div class="apple-card p-4 bg-white/[0.03] border border-white/10 hover:border-[#FF9F0A]/30 transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-white/60 font-medium">Transacciones Totales</span>
+          <span class="text-base">⚡</span>
+        </div>
+        <div id="statTransactions" class="text-2xl font-bold font-mono text-[#FF9F0A] mt-1">15,820</div>
+        <span class="text-[10px] text-white/40 font-mono">Bloques procesados</span>
+      </div>
+    </div>
+
+    <!-- Navegación por Pestañas del Protocol Explorer -->
+    <div class="apple-nav-capsule flex gap-1 overflow-x-auto p-1">
+      <button data-tab="tab-assets" class="nav-tab-btn tab-active px-4 py-2 text-xs font-semibold">
+        IP Assets (Activos del Protocolo)
+      </button>
+      <button data-tab="tab-transactions" class="nav-tab-btn tab-inactive px-4 py-2 text-xs font-medium">
+        Registro de Transacciones
+      </button>
+      <button data-tab="tab-sdk" class="nav-tab-btn tab-inactive px-4 py-2 text-xs font-medium">
+        Interacción SDK (Read / Write)
+      </button>
+    </div>
+
+    <!-- TAB 1: IP ASSETS -->
+    <section id="tab-assets" class="tab-pane space-y-4">
+      <div class="apple-card p-5 bg-[#0a0a0d] border border-white/10 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-white font-mono">Catálogo de Activos IP Registrados</h3>
+            <p class="text-xs text-white/50">Listado de entidades, caracteres, contratos y creadores.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="filterInput" placeholder="Buscar por ID, Tipo o Hash..." class="apple-input text-xs py-1 px-3 w-64">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-white/[0.04] text-white/60 border-b border-white/10">
+              <tr>
+                <th class="p-3">Asset ID</th>
+                <th class="p-3">Nombre</th>
+                <th class="p-3">Tipo</th>
+                <th class="p-3">Org ID</th>
+                <th class="p-3">Propietario (Owner)</th>
+                <th class="p-3">Tx Hash</th>
+                <th class="p-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="assetsTableBody" class="divide-y divide-white/[0.06] text-white/80">
+              <!-- Renderizado dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: TRANSACTIONS -->
+    <section id="tab-transactions" class="tab-pane hidden space-y-4">
+      <div class="apple-card p-5 bg-[#0a0a0d] border border-white/10 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white font-mono">Historial de Transacciones en el Protocolo</h3>
+            <p class="text-xs text-white/50">Llamadas a métodos de contrato y validaciones de estado.</p>
+          </div>
+          <span class="apple-badge apple-badge-green text-[10px] font-mono">Sincronizado</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-white/[0.04] text-white/60 border-b border-white/10">
+              <tr>
+                <th class="p-3">Hash Transacción</th>
+                <th class="p-3">Método / Acción</th>
+                <th class="p-3">Bloque</th>
+                <th class="p-3">Gas Utilizado</th>
+                <th class="p-3">Estado</th>
+                <th class="p-3 text-right">Tiempo</th>
+              </tr>
+            </thead>
+            <tbody id="txTableBody" class="divide-y divide-white/[0.06] text-white/80">
+              <!-- Renderizado dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: SDK INTERACTION -->
+    <section id="tab-sdk" class="tab-pane hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Read SDK -->
+        <div class="apple-card p-5 bg-[#0c0c10] border border-white/10 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+              Read from SDK (Consultas)
+            </h3>
+            <span class="apple-badge apple-badge-blue text-[10px] font-mono">GET</span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block text-white/60 mb-1">Consultar IP Org:</label>
+              <div class="flex gap-2">
+                <input type="text" value="ip-org-078-uptc" class="apple-input flex-1 font-mono text-xs" readonly>
+                <button class="apple-btn-secondary text-xs px-3" onclick="alert('Consulta SDK: IP Org 078 activa con 15 activos asociados.')">Ejecutar</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-white/60 mb-1">Consultar Relaciones:</label>
+              <div class="flex gap-2">
+                <input type="text" value="rel-type-derivative-v1" class="apple-input flex-1 font-mono text-xs" readonly>
+                <button class="apple-btn-secondary text-xs px-3" onclick="alert('Consulta SDK: Relación de derivación permitida con split de regalías del 5%.')">Ejecutar</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-white/60 mb-1">Verificar Licencias (SP.license):</label>
+              <div class="flex gap-2">
+                <input type="text" value="lic-bound-001928" class="apple-input flex-1 font-mono text-xs" readonly>
+                <button class="apple-btn-secondary text-xs px-3" onclick="alert('Consulta SDK: Licencia activa y válida hasta 2027.')">Ejecutar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Write SDK -->
+        <div class="apple-card p-5 bg-[#0c0c10] border border-white/10 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#BF5AF2]"></span>
+              Write to SDK (Escritura & Minteo)
+            </h3>
+            <span class="apple-badge apple-badge-purple text-[10px] font-mono">POST / WRITE</span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block text-white/60 mb-1">Registrar Nuevo IP Asset:</label>
+              <input type="text" id="newAssetName" placeholder="Nombre del activo..." class="apple-input w-full font-mono text-xs mb-2">
+              <button id="btnCreateAsset" class="apple-btn-primary w-full text-xs py-2" style="background: linear-gradient(180deg, #BF5AF2 0%, #7839EE 100%);">
+                Registrar en el Protocolo
+              </button>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px] text-white/60">
+              <span class="text-white font-semibold">Integración Next.js:</span> Esta aplicación cuenta con la arquitectura completa en TypeScript y React en la carpeta <code>protocol-explorer-app/</code>.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Script del Protocol Explorer -->
+  <script>
+    (function() {
+      // Sesión de usuario desde localStorage
+      try {
+        const session = localStorage.getItem('uptc_openstack_session_v1');
+        if (session) {
+          const user = JSON.parse(session);
+          const badge = document.getElementById('userBadgeHeader');
+          if (badge) {
+            badge.textContent = `${user.role.toUpperCase()}: ${user.name}`;
+            badge.className = user.role === 'profesor' ? 'apple-badge apple-badge-blue text-[10px] font-mono' : 'apple-badge apple-badge-green text-[10px] font-mono';
+          }
+        }
+      } catch(e) {}
+
+      // Datos precargados de IP Assets (tomados del mock del proyecto)
+      const ipAssets = [
+        { id: '1000000000015', name: 'Darth Vader', type: 'Character', orgId: '78', owner: '0xf398...4ab', tx: '0xb748c4...5644' },
+        { id: '1000000000028', name: 'Cyberpunk Drone', type: 'Item', orgId: '78', owner: '0xf398...4ab', tx: '0xb74c18...459b' },
+        { id: '1000000000052', name: 'Neo Tokyo 2099', type: 'Location', orgId: '78', owner: '0xf398...4ab', tx: '0xbb5463...adb4' },
+        { id: '1000000000038', name: 'UPTC Quantum Core', type: 'Art', orgId: '78', owner: '0xf398...4ab', tx: '0xbe783b...97f1' },
+        { id: '1000000000001', name: 'Galactic Alliance', type: 'Group', orgId: '78', owner: '0xf398...4ab', tx: '0xc189ad...8921' },
+        { id: '1000000000089', name: 'Protocol Gateway Node', type: 'Story', orgId: '92', owner: '0xa712...99c', tx: '0xdf8102...11b2' }
+      ];
+
+      // Datos de Transacciones
+      const transactions = [
+        { hash: '0xb748c4...5644', method: 'createIpAsset', block: '19,421,802', gas: '124,510', status: 'Confirmada', time: 'hace 2 min' },
+        { hash: '0xb74c18...459b', method: 'registerRelationship', block: '19,421,798', gas: '86,200', status: 'Confirmada', time: 'hace 6 min' },
+        { hash: '0xbb5463...adb4', method: 'configureLicense', block: '19,421,750', gas: '142,390', status: 'Confirmada', time: 'hace 18 min' },
+        { hash: '0xbe783b...97f1', method: 'createIpOrg', block: '19,421,690', gas: '210,000', status: 'Confirmada', time: 'hace 35 min' },
+        { hash: '0xc189ad...8921', method: 'transferAsset', block: '19,421,610', gas: '54,120', status: 'Confirmada', time: 'hace 1 hora' }
+      ];
+
+      function renderAssets(data) {
+        const tbody = document.getElementById('assetsTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-white/[0.02] transition';
+          tr.innerHTML = `
+            <td class="p-3 text-[#64D2FF] font-bold">${item.id}</td>
+            <td class="p-3 text-white">${item.name}</td>
+            <td class="p-3"><span class="apple-badge apple-badge-purple text-[10px]">${item.type}</span></td>
+            <td class="p-3 text-white/60">${item.orgId}</td>
+            <td class="p-3 text-white/50">${item.owner}</td>
+            <td class="p-3 text-white/40">${item.tx}</td>
+            <td class="p-3 text-right">
+              <button class="text-[11px] text-[#64D2FF] hover:underline" onclick="alert('Detalles del IP Asset ' + '${item.id}' + ': ' + '${item.name}')">Ver</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderTransactions(data) {
+        const tbody = document.getElementById('txTableBody');
+        tbody.innerHTML = '';
+        data.forEach(tx => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-white/[0.02] transition';
+          tr.innerHTML = `
+            <td class="p-3 text-[#BF5AF2] font-bold">${tx.hash}</td>
+            <td class="p-3 text-white">${tx.method}</td>
+            <td class="p-3 text-white/60">${tx.block}</td>
+            <td class="p-3 text-white/50">${tx.gas}</td>
+            <td class="p-3"><span class="apple-badge apple-badge-green text-[10px]">${tx.status}</span></td>
+            <td class="p-3 text-right text-white/40">${tx.time}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Filtro de búsqueda
+      document.getElementById('filterInput').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const filtered = ipAssets.filter(a => 
+          a.id.toLowerCase().includes(q) || 
+          a.name.toLowerCase().includes(q) || 
+          a.type.toLowerCase().includes(q) ||
+          a.tx.toLowerCase().includes(q)
+        );
+        renderAssets(filtered);
+      });
+
+      // Pestañas
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab-btn').forEach(b => {
+            b.className = 'nav-tab-btn tab-inactive px-4 py-2 text-xs font-medium';
+          });
+          btn.className = 'nav-tab-btn tab-active px-4 py-2 text-xs font-semibold';
+
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+          const target = document.getElementById(btn.dataset.tab);
+          if (target) target.classList.remove('hidden');
+        });
+      });
+
+      // Crear nuevo activo simulado
+      document.getElementById('btnCreateAsset').addEventListener('click', () => {
+        const nameInput = document.getElementById('newAssetName');
+        const name = nameInput.value.trim();
+        if (!name) {
+          alert('Por favor ingrese el nombre del activo IP.');
+          return;
+        }
+
+        const newId = '100000000' + Math.floor(1000 + Math.random() * 9000);
+        const newTx = '0x' + Array.from({length: 6}, () => Math.floor(Math.random()*16).toString(16)).join('') + '...89ab';
+        ipAssets.unshift({
+          id: newId,
+          name: name,
+          type: 'Story',
+          orgId: '78',
+          owner: '0xf398...4ab',
+          tx: newTx
+        });
+
+        transactions.unshift({
+          hash: newTx,
+          method: 'createIpAsset',
+          block: '19,421,805',
+          gas: '115,200',
+          status: 'Confirmada',
+          time: 'hace unos segundos'
+        });
+
+        renderAssets(ipAssets);
+        renderTransactions(transactions);
+
+        // Actualizar contadores
+        document.getElementById('statIpAssets').textContent = (1280 + 1).toLocaleString();
+        document.getElementById('statTransactions').textContent = (15820 + 1).toLocaleString();
+
+        nameInput.value = '';
+        alert(`¡Activo IP "${name}" registrado con éxito en Protocol Explorer con ID ${newId}!`);
+      });
+
+      // Simular nueva transacción aleatoria
+      document.getElementById('btnNewTxn').addEventListener('click', () => {
+        const methods = ['registerRelationship', 'configureLicense', 'createIpOrg', 'transferAsset'];
+        const m = methods[Math.floor(Math.random() * methods.length)];
+        const hash = '0x' + Array.from({length: 6}, () => Math.floor(Math.random()*16).toString(16)).join('') + '...dead';
+        
+        transactions.unshift({
+          hash: hash,
+          method: m,
+          block: '19,421,' + Math.floor(800 + Math.random() * 50),
+          gas: Math.floor(50000 + Math.random() * 100000).toLocaleString(),
+          status: 'Confirmada',
+          time: 'hace unos segundos'
+        });
+
+        renderTransactions(transactions);
+        alert(`Nueva transacción simulada: ${m} [${hash}] confirmada en el bloque.`);
+      });
+
+      document.getElementById('btnRefreshData').addEventListener('click', () => {
+        renderAssets(ipAssets);
+        renderTransactions(transactions);
+        alert('Datos del protocolo sincronizados.');
+      });
+
+      // Render inicial
+      renderAssets(ipAssets);
+      renderTransactions(transactions);
+    })();
+  </script>
+</body>
+</html>
+

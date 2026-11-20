@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Flujo de Paquetes en Red (Packet Flow Simulator) | UPTC 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            apple: {
+              blue: "#0A84FF",
+              green: "#30D158",
+              indigo: "#5E5CE6",
+              orange: "#FF9F0A",
+              pink: "#FF375F",
+              purple: "#BF5AF2",
+              red: "#FF453A",
+              teal: "#64D2FF",
+              yellow: "#FFD60A"
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    canvas {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col selection:bg-[#0A84FF] selection:text-white">
+
+  <!-- Apple Liquid Glass Header -->
+  <header class="apple-glass-nav sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <!-- Botón Volver al Portal Principal -->
+          <a href="../index.html" class="apple-btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Volver al Portal</span>
+          </a>
+
+          <!-- Icono -->
+          <div class="w-10 h-10 rounded-[12px] bg-gradient-to-b from-[#64D2FF] to-[#0A84FF] flex items-center justify-center text-white font-bold shadow-[0_4px_14px_rgba(10,132,255,0.4)] shrink-0 border border-white/20">
+            <svg class="w-5 h-5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="apple-badge apple-badge-blue text-[10px] uppercase font-mono tracking-wider">Simulación 1 · Redes & Telecomunicaciones</span>
+              <span class="text-white/20">|</span>
+              <span id="userBadgeHeader" class="apple-badge apple-badge-gray text-[10px] font-mono">Sesión OpenStack</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-bold text-white tracking-tight mt-0.5">
+              Simulador de Flujo de Paquetes en Red (Network Packet Flow Simulator)
+            </h1>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="https://netsim.networkershome.com" target="_blank" rel="noopener noreferrer" class="apple-btn-secondary text-xs flex items-center gap-1.5 border-[#0A84FF]/40 text-[#64D2FF]">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+            <span>Lanzar NetSim Cloud Live</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- Introducción Resumen -->
+    <div class="apple-card p-5 bg-gradient-to-r from-[#141419] to-[#0D0D11] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>Tránsito, Conmutación, Enrutamiento y Filtrado de Paquetes</span>
+          <span class="apple-badge apple-badge-green text-xs font-mono">Tiempo Real</span>
+        </h2>
+        <p class="text-xs text-white/70 mt-1 max-w-3xl leading-relaxed">
+          Visualice cómo un paquete IP generado en un cliente atraviesa el <strong>Switch L2</strong> (Capa de Enlace), experimenta traducción <strong>NAT y enrutamiento L3</strong> en el Gateway, pasa por la inspección de estado del <strong>Firewall</strong> y culmina en el <strong>Servidor Web</strong> con desencapsulación completa.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btnTransmit" class="apple-btn-primary text-xs px-4 py-2 flex items-center gap-2 shadow-lg shadow-blue-500/20">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Transmitir Paquete</span>
+        </button>
+        <button id="btnReset" class="apple-btn-secondary text-xs px-3 py-2">
+          Reiniciar
+        </button>
+      </div>
+    </div>
+
+    <!-- Layout Grid: Canvas + Inspector de Capas OSI -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Panel Izquierdo: Canvas Topológico (8 cols) -->
+      <div class="lg:col-span-8 space-y-4">
+        <div class="apple-card p-4 bg-[#0a0a0d] border border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#30D158] animate-pulse"></span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-white/70 font-mono">Topología Activa de Red</h3>
+            </div>
+            <div class="flex items-center gap-3 text-xs">
+              <label class="flex items-center gap-1.5 cursor-pointer text-white/80">
+                <input type="checkbox" id="chkFirewallDrop" class="rounded accent-[#FF453A]">
+                <span class="text-[11px] text-[#FF453A] font-medium">Bloquear en Firewall (Simular Ataque/Filtro)</span>
+              </label>
+              <span class="text-white/20">|</span>
+              <div class="flex items-center gap-1.5 text-white/60">
+                <span class="text-[11px]">Velocidad:</span>
+                <select id="simSpeed" class="apple-select text-[11px] py-0.5 px-2">
+                  <option value="1">1x Normal</option>
+                  <option value="1.5" selected>1.5x Rápida</option>
+                  <option value="0.5">0.5x Lenta</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas Topológico -->
+          <div class="relative rounded-xl overflow-hidden border border-white/[0.08] bg-[#050508]">
+            <canvas id="packetCanvas" width="760" height="340" class="w-full h-auto block"></canvas>
+            
+            <div id="canvasOverlay" class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-white/50 pointer-events-none">
+              <span>Subred LAN: 192.168.1.0/24</span>
+              <span id="hopStatusText" class="text-[#64D2FF]">Listo para transmitir</span>
+              <span>Subred WAN: 203.0.113.0/24</span>
+            </div>
+          </div>
+
+          <!-- Parámetros del Paquete -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2">
+            <div>
+              <label class="block text-[11px] font-medium text-white/60 mb-1">Protocolo L7:</label>
+              <select id="pktProtocol" class="apple-select w-full text-xs">
+                <option value="HTTP">HTTP (Puerto 80)</option>
+                <option value="HTTPS" selected>HTTPS (Puerto 443)</option>
+                <option value="DNS">DNS Query (Puerto 53)</option>
+                <option value="ICMP">ICMP Echo (Ping)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-white/60 mb-1">Host Origen:</label>
+              <input type="text" id="srcIp" value="192.168.1.10" class="apple-input w-full text-xs font-mono" readonly>
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-white/60 mb-1">Destino WAN:</label>
+              <input type="text" id="dstIp" value="93.184.216.34" class="apple-input w-full text-xs font-mono" readonly>
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-white/60 mb-1">Traducción NAT:</label>
+              <input type="text" id="natIp" value="203.0.113.5:52410" class="apple-input w-full text-xs font-mono text-[#FF9F0A]" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Métricas Rápidas -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="apple-card p-3.5 bg-white/[0.02]">
+            <span class="text-[11px] text-white/50 font-medium">Paquetes Enviados</span>
+            <div id="statSent" class="text-xl font-bold font-mono text-[#64D2FF] mt-0.5">0</div>
+          </div>
+          <div class="apple-card p-3.5 bg-white/[0.02]">
+            <span class="text-[11px] text-white/50 font-medium">Paquetes Entregados</span>
+            <div id="statDelivered" class="text-xl font-bold font-mono text-[#30D158] mt-0.5">0</div>
+          </div>
+          <div class="apple-card p-3.5 bg-white/[0.02]">
+            <span class="text-[11px] text-white/50 font-medium">Bloqueados en FW</span>
+            <div id="statBlocked" class="text-xl font-bold font-mono text-[#FF453A] mt-0.5">0</div>
+          </div>
+          <div class="apple-card p-3.5 bg-white/[0.02]">
+            <span class="text-[11px] text-white/50 font-medium">Traducciones NAT</span>
+            <div id="statNat" class="text-xl font-bold font-mono text-[#FF9F0A] mt-0.5">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel Derecho: Inspector de Encapsulación OSI (4 cols) -->
+      <div class="lg:col-span-4 space-y-4">
+        <div class="apple-card p-4 bg-[#0c0c10] border border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-white/70 font-mono">
+              Encapsulación OSI por Salto
+            </h3>
+            <span id="badgeCurrentHop" class="apple-badge apple-badge-blue text-[10px] font-mono">
+              Salto: Reposo
+            </span>
+          </div>
+
+          <p class="text-[11px] text-white/60">
+            Haga clic en «Transmitir Paquete» para ver las transformaciones de cabeceras en tiempo real.
+          </p>
+
+          <!-- Pila OSI Interactiva -->
+          <div class="space-y-2 font-mono text-xs" id="osiStackContainer">
+            <!-- Capa 7 -->
+            <div class="p-2.5 rounded-lg border border-purple-500/30 bg-purple-500/10 transition-all" id="osiL7">
+              <div class="flex items-center justify-between text-purple-400 font-bold text-[11px]">
+                <span>Capa 7 · Aplicación</span>
+                <span id="osiL7Proto">HTTPS</span>
+              </div>
+              <div class="text-[11px] text-white/80 mt-1" id="osiL7Payload">
+                TLS Handshake / GET /index.html
+              </div>
+            </div>
+
+            <!-- Capa 4 -->
+            <div class="p-2.5 rounded-lg border border-blue-500/30 bg-blue-500/10 transition-all" id="osiL4">
+              <div class="flex items-center justify-between text-blue-400 font-bold text-[11px]">
+                <span>Capa 4 · Transporte</span>
+                <span id="osiL4Proto">TCP</span>
+              </div>
+              <div class="text-[11px] text-white/80 mt-1" id="osiL4Info">
+                Src Port: 52410 → Dst Port: 443 [SYN, ACK]
+              </div>
+            </div>
+
+            <!-- Capa 3 -->
+            <div class="p-2.5 rounded-lg border border-teal-500/30 bg-teal-500/10 transition-all" id="osiL3">
+              <div class="flex items-center justify-between text-teal-400 font-bold text-[11px]">
+                <span>Capa 3 · Red</span>
+                <span id="osiL3Proto">IPv4</span>
+              </div>
+              <div class="text-[11px] text-white/80 mt-1" id="osiL3Info">
+                Src IP: 192.168.1.10 → Dst IP: 93.184.216.34 (TTL: 64)
+              </div>
+            </div>
+
+            <!-- Capa 2 -->
+            <div class="p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 transition-all" id="osiL2">
+              <div class="flex items-center justify-between text-emerald-400 font-bold text-[11px]">
+                <span>Capa 2 · Enlace de Datos</span>
+                <span>Ethernet II</span>
+              </div>
+              <div class="text-[11px] text-white/80 mt-1" id="osiL2Info">
+                Src MAC: 00:1A:2B:3C:4D:5E → Dst MAC: AA:BB:CC:DD:EE:01
+              </div>
+            </div>
+
+            <!-- Capa 1 -->
+            <div class="p-2.5 rounded-lg border border-gray-500/30 bg-gray-500/10 transition-all" id="osiL1">
+              <div class="flex items-center justify-between text-gray-400 font-bold text-[11px]">
+                <span>Capa 1 · Física</span>
+                <span>1000BASE-T</span>
+              </div>
+              <div class="text-[11px] text-white/80 mt-1" id="osiL1Info">
+                Transmisión diferencial 8B/10B en Par Trenzado UTP
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registro de Eventos en Vivo -->
+        <div class="apple-card p-4 bg-[#0a0a0d] border border-white/10 space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-white/70 font-mono">Log de Red</h4>
+            <button id="btnClearLog" class="text-[10px] text-white/40 hover:text-white transition">Limpiar</button>
+          </div>
+          <div id="simLogBox" class="h-40 overflow-y-auto pr-1 space-y-1 font-mono text-[11px] text-white/70">
+            <div class="text-white/40">[00:00:00] Simulador de Flujo inicializado. Topología lista.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Script del Simulador -->
+  <script>
+    (function() {
+      // Sesión de usuario desde localStorage
+      try {
+        const session = localStorage.getItem('uptc_openstack_session_v1');
+        if (session) {
+          const user = JSON.parse(session);
+          const badge = document.getElementById('userBadgeHeader');
+          if (badge) {
+            badge.textContent = `${user.role.toUpperCase()}: ${user.name}`;
+            badge.className = user.role === 'profesor' ? 'apple-badge apple-badge-blue text-[10px] font-mono' : 'apple-badge apple-badge-green text-[10px] font-mono';
+          }
+        }
+      } catch(e) {}
+
+      // Canvas y Nodos
+      const canvas = document.getElementById('packetCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const nodes = [
+        { id: 'pc', name: 'PC Cliente', sub: '192.168.1.10', icon: '💻', x: 70, y: 170, color: '#0A84FF' },
+        { id: 'switch', name: 'Switch L2', sub: 'VLAN 10', icon: '🔀', x: 230, y: 170, color: '#30D158' },
+        { id: 'router', name: 'Router / NAT', sub: 'Gateway', icon: '🌐', x: 390, y: 170, color: '#FF9F0A' },
+        { id: 'firewall', name: 'Firewall SPI', sub: 'Stateful', icon: '🛡️', x: 550, y: 170, color: '#FF453A' },
+        { id: 'server', name: 'Servidor Web', sub: '93.184.216.34', icon: '🗄️', x: 690, y: 170, color: '#BF5AF2' }
+      ];
+
+      let packetState = {
+        active: false,
+        fromIdx: 0,
+        toIdx: 1,
+        progress: 0, // 0 a 1 entre nodos
+        currentHop: 0,
+        isReturning: false,
+        isBlocked: false,
+        speed: 1.5
+      };
+
+      let stats = { sent: 0, delivered: 0, blocked: 0, nat: 0 };
+
+      function logEvent(msg, color = 'text-white/80') {
+        const box = document.getElementById('simLogBox');
+        const now = new Date().toTimeString().split(' ')[0];
+        const item = document.createElement('div');
+        item.className = color;
+        item.textContent = `[${now}] ${msg}`;
+        box.appendChild(item);
+        box.scrollTop = box.scrollHeight;
+      }
+
+      function drawNetwork() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar Enlaces entre nodos
+        for (let i = 0; i < nodes.length - 1; i++) {
+          const n1 = nodes[i];
+          const n2 = nodes[i + 1];
+
+          ctx.beginPath();
+          ctx.moveTo(n1.x, n1.y);
+          ctx.lineTo(n2.x, n2.y);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = '#1f1f28';
+          ctx.stroke();
+
+          // Marcador de cable
+          ctx.beginPath();
+          ctx.arc((n1.x + n2.x) / 2, (n1.y + n2.y) / 2, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#333344';
+          ctx.fill();
+        }
+
+        // Si hay paquete en tránsito, dibujar la línea activa brillante
+        if (packetState.active) {
+          const n1 = nodes[packetState.fromIdx];
+          const n2 = nodes[packetState.toIdx];
+          
+          ctx.beginPath();
+          ctx.moveTo(n1.x, n1.y);
+          ctx.lineTo(n1.x + (n2.x - n1.x) * packetState.progress, n1.y + (n2.y - n1.y) * packetState.progress);
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = packetState.isBlocked ? '#FF453A' : '#64D2FF';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = packetState.isBlocked ? 'rgba(255,69,58,0.8)' : 'rgba(100,210,255,0.8)';
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+
+        // Dibujar Nodos
+        nodes.forEach((node, idx) => {
+          // Fondo del nodo
+          ctx.beginPath();
+          ctx.roundRect(node.x - 42, node.y - 38, 84, 76, 14);
+          ctx.fillStyle = '#101014';
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = node.color + '66';
+          ctx.stroke();
+
+          // Icono
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(node.icon, node.x, node.y - 10);
+
+          // Nombre
+          ctx.font = 'bold 10px SF Pro Text, sans-serif';
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(node.name, node.x, node.y + 14);
+
+          // Subtítulo
+          ctx.font = '9px Fira Code, monospace';
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.fillText(node.sub, node.x, node.y + 26);
+        });
+
+        // Dibujar Paquete
+        if (packetState.active) {
+          const n1 = nodes[packetState.fromIdx];
+          const n2 = nodes[packetState.toIdx];
+          const curX = n1.x + (n2.x - n1.x) * packetState.progress;
+          const curY = n1.y + (n2.y - n1.y) * packetState.progress;
+
+          // Efecto Glow
+          ctx.beginPath();
+          ctx.arc(curX, curY, 12, 0, Math.PI * 2);
+          ctx.fillStyle = packetState.isBlocked ? 'rgba(255,69,58,0.3)' : 'rgba(10,132,255,0.35)';
+          ctx.fill();
+
+          // Centro del paquete
+          ctx.beginPath();
+          ctx.arc(curX, curY, 7, 0, Math.PI * 2);
+          ctx.fillStyle = packetState.isBlocked ? '#FF453A' : '#64D2FF';
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.stroke();
+
+          // Etiqueta del protocolo flotante
+          ctx.font = 'bold 9px Fira Code, monospace';
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(document.getElementById('pktProtocol').value, curX, curY - 16);
+        }
+      }
+
+      function updateOSIInfo(nodeIdx, isReturn = false) {
+        const proto = document.getElementById('pktProtocol').value;
+        const badge = document.getElementById('badgeCurrentHop');
+        const hopText = document.getElementById('hopStatusText');
+        
+        const node = nodes[nodeIdx];
+        badge.textContent = `Salto: ${node.name}`;
+        hopText.textContent = `Paquete en: ${node.name} (${node.sub})`;
+
+        const l7 = document.getElementById('osiL7Info');
+        const l4 = document.getElementById('osiL4Info');
+        const l3 = document.getElementById('osiL3Info');
+        const l2 = document.getElementById('osiL2Info');
+
+        if (nodeIdx === 0) { // PC
+          l3.textContent = 'Src: 192.168.1.10 → Dst: 93.184.216.34';
+          l2.textContent = 'Src MAC: 00:1A:2B:3C:4D:5E → Dst MAC: AA:BB:CC:01 (Switch)';
+        } else if (nodeIdx === 1) { // Switch
+          l2.textContent = 'Conmutación Capa 2: Puerto 1 → Puerto 4 vía MAC Table CAM';
+        } else if (nodeIdx === 2) { // Router / NAT
+          l3.textContent = 'NAT Aplicado: 192.168.1.10:52410 → 203.0.113.5:52410';
+          l2.textContent = 'Reescritura Capa 2: Dst MAC Router → Dst MAC Firewall Next-Hop';
+        } else if (nodeIdx === 3) { // Firewall
+          if (packetState.isBlocked) {
+            l3.textContent = 'FILTRADO: Paquete descartado por política de seguridad.';
+          } else {
+            l3.textContent = 'SPI OK: Conexión entrante registrada en tabla de estado.';
+          }
+        } else if (nodeIdx === 4) { // Server
+          l7.textContent = 'Petición recibida con éxito: 200 OK generado.';
+        }
+      }
+
+      function animStep() {
+        if (!packetState.active) {
+          drawNetwork();
+          return;
+        }
+
+        const step = 0.02 * packetState.speed;
+        packetState.progress += step;
+
+        if (packetState.progress >= 1) {
+          packetState.progress = 0;
+          packetState.currentHop++;
+
+          if (!packetState.isReturning) {
+            // Avanza al siguiente salto
+            packetState.fromIdx = packetState.toIdx;
+            packetState.toIdx = packetState.fromIdx + 1;
+
+            updateOSIInfo(packetState.fromIdx);
+
+            // Verificar si el Firewall bloquea
+            const blockChecked = document.getElementById('chkFirewallDrop').checked;
+            if (packetState.fromIdx === 3 && blockChecked) { // Firewall
+              packetState.isBlocked = true;
+              stats.blocked++;
+              document.getElementById('statBlocked').textContent = stats.blocked;
+              logEvent('FIREWALL SPI: Tráfico bloqueado por política de contención.', 'text-[#FF453A]');
+              packetState.active = false;
+              drawNetwork();
+              return;
+            }
+
+            if (packetState.fromIdx === 2) {
+              stats.nat++;
+              document.getElementById('statNat').textContent = stats.nat;
+              logEvent('ROUTER: Traducción NAT 192.168.1.10 → 203.0.113.5 aplicada.', 'text-[#FF9F0A]');
+            }
+
+            if (packetState.toIdx >= nodes.length) {
+              // Llegó al servidor, inicia retorno
+              stats.delivered++;
+              document.getElementById('statDelivered').textContent = stats.delivered;
+              logEvent('SERVIDOR: Paquete recibido. Enviando respuesta 200 OK...', 'text-[#30D158]');
+              packetState.isReturning = true;
+              packetState.fromIdx = nodes.length - 1;
+              packetState.toIdx = nodes.length - 2;
+            }
+          } else {
+            // Regresando a la PC
+            packetState.fromIdx = packetState.toIdx;
+            packetState.toIdx = packetState.fromIdx - 1;
+
+            if (packetState.toIdx < 0) {
+              logEvent('PC CLIENTE: Transmisión completada y confirmada con éxito.', 'text-[#64D2FF]');
+              packetState.active = false;
+              document.getElementById('hopStatusText').textContent = 'Listo para transmitir';
+              document.getElementById('badgeCurrentHop').textContent = 'Salto: Reposo';
+            }
+          }
+        }
+
+        drawNetwork();
+        if (packetState.active) {
+          requestAnimationFrame(animStep);
+        }
+      }
+
+      function startTransmission() {
+        if (packetState.active) return;
+        packetState.active = true;
+        packetState.fromIdx = 0;
+        packetState.toIdx = 1;
+        packetState.progress = 0;
+        packetState.currentHop = 0;
+        packetState.isReturning = false;
+        packetState.isBlocked = false;
+
+        stats.sent++;
+        document.getElementById('statSent').textContent = stats.sent;
+
+        const proto = document.getElementById('pktProtocol').value;
+        logEvent(`Iniciando transmisión paquete ${proto} desde 192.168.1.10`, 'text-[#64D2FF]');
+        updateOSIInfo(0);
+
+        requestAnimationFrame(animStep);
+      }
+
+      // Eventos
+      document.getElementById('btnTransmit').addEventListener('click', startTransmission);
+      document.getElementById('btnReset').addEventListener('click', () => {
+        packetState.active = false;
+        packetState.progress = 0;
+        drawNetwork();
+        logEvent('Simulador reiniciado.', 'text-white/50');
+      });
+
+      document.getElementById('simSpeed').addEventListener('change', (e) => {
+        packetState.speed = parseFloat(e.target.value);
+      });
+
+      document.getElementById('btnClearLog').addEventListener('click', () => {
+        document.getElementById('simLogBox').innerHTML = '<div class="text-white/40">Log reiniciado.</div>';
+      });
+
+      // Dibujo inicial
+      drawNetwork();
+    })();
+  </script>
+</body>
+</html>
+

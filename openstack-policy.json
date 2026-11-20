@@ -1,0 +1,55 @@
+{
+  "version": "2026.1",
+  "project": "UPTC-OpenStack-Redes-Laboratorio",
+  "description": "Matriz de Políticas RBAC y Jerarquía de Roles para OpenStack Keystone v3",
+  "roles": {
+    "profesor": {
+      "level": 1,
+      "description": "Perfil Docente / Instructor con privilegios elevados en OpenStack",
+      "openstack_mapping": "admin",
+      "implied_roles": ["instructor", "member", "reader"],
+      "domain_scope": "Default",
+      "project_scope": "Laboratorio-Redes-UPTC",
+      "capabilities": [
+        "identity:list_users",
+        "identity:get_role",
+        "compute:create_instance",
+        "compute:delete_instance",
+        "network:create_topology",
+        "network:manage_subnets",
+        "simulation:configure_all",
+        "simulation:grade_students",
+        "simulation:inject_failures",
+        "telemetry:full_audit"
+      ]
+    },
+    "alumno": {
+      "level": 2,
+      "description": "Perfil Estudiante con privilegios operativos y de ejecución de prácticas",
+      "openstack_mapping": "member",
+      "implied_roles": ["reader", "student"],
+      "domain_scope": "Default",
+      "project_scope": "Laboratorio-Redes-UPTC",
+      "capabilities": [
+        "compute:get_instance",
+        "compute:list_instances",
+        "network:view_topology",
+        "simulation:run_hub_lab",
+        "simulation:run_repeater_lab",
+        "simulation:run_gateway_lab",
+        "simulation:run_packet_flow",
+        "simulation:view_own_metrics"
+      ]
+    }
+  },
+  "rules": {
+    "context_is_admin": "role:admin or role:profesor",
+    "profesor_required": "rule:context_is_admin",
+    "alumno_or_profesor": "role:alumno or role:profesor or role:member or rule:context_is_admin",
+    "simulation:run": "rule:alumno_or_profesor",
+    "simulation:manage": "rule:profesor_required",
+    "network:simulate_packet": "rule:alumno_or_profesor",
+    "network:simulate_interconnect": "rule:alumno_or_profesor"
+  }
+}
+
